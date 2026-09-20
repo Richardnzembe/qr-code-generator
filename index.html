@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f5ef">
+  <meta name="description" content="Create a QR code for a link or text. Customize it and download a PNG or SVG, free and privately in your browser.">
+  <title>Qraft — A little code. Endless possibilities.</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/vendor/qrcode.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <header class="site-header wrap">
+    <a class="brand" href="./" aria-label="Qraft home"><span class="brand-icon" aria-hidden="true">▦</span> qraft<span class="brand-dot">.</span></a>
+    <span class="header-note"><span class="status-dot"></span> Small code. Big connections.</span>
+  </header>
+  <main class="wrap">
+    <div class="intro"><p class="eyebrow">THE EVERYDAY QR CODE MAKER</p><h1>Make it.<br class="mobile-break"> <span>Scan it.</span> Share it.</h1><p>Turn a link or a little text into your next connection.</p></div>
+    <div class="workspace">
+      <section class="editor" aria-labelledby="editor-title">
+        <div class="section-heading"><span class="step">01</span><h2 id="editor-title">Make it yours</h2></div>
+        <form id="qr-form">
+          <fieldset class="type-picker"><legend class="sr-only">Content type</legend><label><input type="radio" name="type" value="url" checked><span>↗ &nbsp; Website link</span></label><label><input type="radio" name="type" value="text"><span>≡ &nbsp; Plain text</span></label></fieldset>
+          <div class="field"><label for="content" id="content-label">Your website link</label><textarea id="content" rows="3" placeholder="https://example.com" spellcheck="false" aria-describedby="input-hint error"></textarea><div class="field-meta"><span id="input-hint">Paste a link. We’ll handle the rest.</span><span id="counter">0 / 1,000 bytes</span></div></div>
+          <p id="error" class="error" role="alert" hidden></p>
+          <div class="divider"></div>
+          <div class="section-heading small"><span class="step">02</span><h2>A personal touch</h2><span class="optional">OPTIONAL</span></div>
+          <fieldset class="colors"><legend>Code colour</legend><div class="swatches"><label style="--swatch:#172c26"><input type="radio" name="color" value="#172c26" checked><span><span class="sr-only">Forest</span></span></label><label style="--swatch:#141414"><input type="radio" name="color" value="#141414"><span><span class="sr-only">Black</span></span></label><label style="--swatch:#233e83"><input type="radio" name="color" value="#233e83"><span><span class="sr-only">Blue</span></span></label><label style="--swatch:#69356f"><input type="radio" name="color" value="#69356f"><span><span class="sr-only">Plum</span></span></label><label style="--swatch:#963e27"><input type="radio" name="color" value="#963e27"><span><span class="sr-only">Terracotta</span></span></label></div></fieldset>
+          <div class="settings"><div><label for="size">PNG size</label><select id="size"><option value="512">512 × 512 px</option><option value="1024" selected>1024 × 1024 px</option><option value="2048">2048 × 2048 px</option></select></div><div><label for="correction">Error correction</label><select id="correction"><option value="M">Standard · M</option><option value="Q">Enhanced · Q</option><option value="H">Maximum · H</option></select></div></div>
+          <button type="submit" class="generate">Generate QR code <span aria-hidden="true">↗</span></button>
+          <p class="privacy"><span aria-hidden="true">⌁</span> Your content stays in your browser. Always.</p>
+        </form>
+      </section>
+      <section class="preview" aria-labelledby="preview-title">
+        <div class="preview-top"><h2 id="preview-title">Your QR code</h2><span class="live"><span class="status-dot"></span> LIVE PREVIEW</span></div>
+        <div class="code-stage"><div class="code-card"><canvas id="qr-canvas" width="1024" height="1024" role="img" aria-label="Sample QR code for example.com"></canvas></div><span class="corner-note">A shortcut to something good.</span></div>
+        <p id="preview-caption">A little preview of what’s possible.</p><p id="status" class="preview-status" role="status" aria-live="polite">Add your content to make your own.</p>
+        <div class="downloads"><button type="button" id="download-png" disabled>↓ &nbsp; Download PNG</button><button type="button" id="download-svg" disabled>↓ &nbsp; SVG</button></div>
+        <p class="download-note">Crisp, clean, and ready for the real world.</p>
+      </section>
+    </div>
+    <div class="benefits"><p><span aria-hidden="true">✧</span><strong>Free. Full stop.</strong> No accounts, no subscriptions.</p><p><span aria-hidden="true">◎</span><strong>Made to last.</strong> Static codes don’t expire.</p><p><span aria-hidden="true">↙</span><strong>Yours to keep.</strong> From screens to print.</p></div>
+    <details class="help"><summary>A few things worth knowing <span aria-hidden="true">+</span></summary><div><p><strong>How do I use it?</strong> Choose a website link or plain text, enter your content, then download your code. The preview updates as you type.</p><p><strong>PNG or SVG?</strong> PNG works well for everyday sharing. SVG stays sharp at any size, making it useful for posters and print.</p><p><strong>Will my code expire?</strong> The code itself does not expire. A linked website must remain available. To change the content later, generate a new code.</p><p><strong>Before you share:</strong> Scan your downloaded code with your phone. Keep the white border intact. More error correction helps a code tolerate damage, but makes it denser.</p></div></details>
+  </main>
+  <footer class="wrap"><span class="footer-brand">qraft.</span><p>Less friction. More connection.</p><span>MADE FOR SHARING ↗</span></footer>
+  <noscript><p class="noscript">Please enable JavaScript to generate QR codes. Your content is processed locally.</p></noscript>
+</body>
+</html>
