@@ -106,7 +106,7 @@
       data[field] = document.querySelector(`#contact-${field}`).value;
     }
     data.countryCode = document.querySelector('#country-code').value;
-    return QraftContact.build(data);
+    return QranzieContact.build(data);
   }
 
   function showContact(card) {
@@ -208,7 +208,7 @@
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `qraft-code.${extension}`;
+    link.download = `qranzie-code.${extension}`;
     document.body.append(link);
     link.click();
     link.remove();

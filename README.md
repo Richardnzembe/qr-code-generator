@@ -1,4 +1,4 @@
-# Qraft — QR code generator
+# qranzie — QR code generator
 
 A responsive website built with plain HTML, CSS, and JavaScript. No framework, package manager, build step, API key, or backend.
 

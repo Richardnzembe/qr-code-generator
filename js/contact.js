@@ -1,7 +1,7 @@
 'use strict';
 
 // vCard 3.0 (RFC 2426): CRLF lines, escaped text and UTF-8-safe folding.
-const QraftContact = (() => {
+const QranzieContact = (() => {
   const encoder = new TextEncoder();
   const escape = value => value.replace(/\\/g, '\\\\').replace(/\r\n|\r|\n/g, '\\n').replace(/;/g, '\\;').replace(/,/g, '\\,');
   function fold(line) {
@@ -65,4 +65,4 @@ const QraftContact = (() => {
   }
   return { build, phone };
 })();
-if (typeof module !== 'undefined' && module.exports) module.exports = QraftContact;
+if (typeof module !== 'undefined' && module.exports) module.exports = QranzieContact;
