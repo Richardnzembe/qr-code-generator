@@ -11,6 +11,10 @@
   const svgButton = document.querySelector('#download-svg');
   const encoder = new TextEncoder();
   let currentQR = null;
+  let currentContact = null;
+  const vcfButton = document.querySelector('#download-vcf');
+  const contactFields = document.querySelector('#contact-fields');
+  const contactPreview = document.querySelector('#contact-preview');
   let timer;
   const decoration = document.querySelector('#decoration');
   const correction = document.querySelector('#correction');
@@ -21,7 +25,7 @@
   let uploadVersion = 0;
   let previousType = 'url';
   let savedCorrection = correction.value;
-  const drafts = { url: '', text: '', phone: '' };
+  const drafts = { url: '', text: '', phone: '', contact: '' };
   const icons = { star: '★', heart: '♥', phone: '☎' };
   const hasOverlay = () => Boolean(icons[decoration.value] || (decoration.value === 'upload' && logo));
   const selected = name => form.querySelector(`input[name="${name}"]:checked`).value;
@@ -90,7 +94,32 @@
 
   function disableDownloads() {
     currentQR = null;
+    currentContact = null;
+    vcfButton.disabled = true;
+    contactPreview.hidden = true;
     pngButton.disabled = svgButton.disabled = true;
+  }
+
+  function readContact() {
+    const data = {};
+    for (const field of ['first', 'last', 'phone', 'email', 'company', 'title', 'street', 'city', 'country', 'website', 'socials', 'notes']) {
+      data[field] = document.querySelector(`#contact-${field}`).value;
+    }
+    data.countryCode = document.querySelector('#country-code').value;
+    return QraftContact.build(data);
+  }
+
+  function showContact(card) {
+    const details = document.querySelector('#contact-details');
+    details.replaceChildren();
+    for (const [label, value] of [['Name', card.name], ...card.details]) {
+      const term = document.createElement('dt');
+      const description = document.createElement('dd');
+      term.textContent = label;
+      description.textContent = value;
+      details.append(term, description);
+    }
+    contactPreview.hidden = false;
   }
 
   function generate(explicit = false) {
@@ -104,10 +133,20 @@
       return;
     }
     const raw = content.value;
+    const isContact = selected('type') === 'contact';
+    vcfButton.hidden = !isContact;
     const byteCount = encoder.encode(raw).length;
     document.querySelector('#counter').textContent = `${byteCount.toLocaleString()} / 1,000 bytes`;
     let value = selected('type') === 'url' ? raw.trim() : raw;
     try {
+      let card = null;
+      if (isContact) {
+        document.querySelector('#contact-counter').textContent = 'Complete your contact details below.';
+        card = readContact();
+        document.querySelector('#contact-counter').textContent = `${card.bytes.toLocaleString()} / 1,000 bytes`;
+        if (card.bytes > 1000) throw new Error('Your contact card is too large. Shorten notes or links to stay within 1,000 bytes.');
+        value = card.vcard;
+      }
       if (!value.trim()) {
         const sample = qrcode(0, hasOverlay() ? 'H' : 'M');
         sample.addData('https://example.com');
@@ -119,7 +158,7 @@
         if (explicit) throw new Error('Enter a website link, text, or a phone number first.');
         return;
       }
-      if (byteCount > 1000) throw new Error('Please shorten your content to 1,000 UTF-8 bytes or fewer.');
+      if (!isContact && byteCount > 1000) throw new Error('Please shorten your content to 1,000 UTF-8 bytes or fewer.');
       if (selected('type') === 'url') {
         if (!/^https?:\/\//i.test(value)) value = `https://${value}`;
         let url;
@@ -148,9 +187,10 @@
       qr.make();
       draw(qr);
       currentQR = qr;
-      canvas.setAttribute('aria-label', `QR code for ${selected('type') === 'phone' ? 'your phone number' : selected('type') === 'url' ? 'your website link' : 'your text'}`);
-      caption.textContent = value.length > 65 ? `${value.slice(0, 62)}…` : value;
-      status.textContent = selected('type') === 'phone' ? 'Scan to open this number in your phone’s dialler.' : 'Ready to download. Give it a scan!';
+      canvas.setAttribute('aria-label', `QR code for ${isContact ? 'your contact card' : selected('type') === 'phone' ? 'your phone number' : selected('type') === 'url' ? 'your website link' : 'your text'}`);
+      caption.textContent = isContact ? card.name : value.length > 65 ? `${value.slice(0, 62)}…` : value;
+      status.textContent = isContact ? 'Scan to review and optionally save this contact.' : selected('type') === 'phone' ? 'Scan to open this number in your phone’s dialler.' : 'Ready to download. Give it a scan!';
+      if (card) { currentContact = card; vcfButton.disabled = false; showContact(card); }
       pngButton.disabled = svgButton.disabled = false;
     } catch (issue) {
       canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
@@ -159,7 +199,7 @@
       status.textContent = 'Check your content to generate a code.';
       error.textContent = issue instanceof Error ? issue.message : 'This content is too large. Try shorter text or lower error correction.';
       error.hidden = false;
-      content.setAttribute('aria-invalid', 'true');
+      if (!isContact) content.setAttribute('aria-invalid', 'true');
     }
   }
 
@@ -183,6 +223,12 @@
     clearTimeout(timer);
     timer = setTimeout(() => generate(), 180);
   });
+  contactFields.addEventListener('input', () => {
+    disableDownloads();
+    status.textContent = 'Updating your contact…';
+    clearTimeout(timer);
+    timer = setTimeout(() => generate(), 250);
+  });
   form.addEventListener('change', event => {
     if (event.target === logoFile) return;
     if (event.target.name === 'type') {
@@ -192,13 +238,18 @@
       const settings = {
         url: ['Your website link', 'Paste a link. We’ll handle the rest.', 'https://example.com', 'url'],
         text: ['Your text', 'A note, a message, or something worth sharing.', 'Write something worth scanning…', 'text'],
-        phone: ['Your phone number', 'Use a local number with the country code above, or a full + international number.', '0779019896 or +263779019896', 'tel']
+        phone: ['Your phone number', 'Use a local number with the country code above, or a full + international number.', '0779019896 or +263779019896', 'tel'],
+        contact: ['Your contact card', '', '', 'text']
       }[previousType];
       document.querySelector('#content-label').textContent = settings[0];
       document.querySelector('#input-hint').textContent = settings[1];
       content.placeholder = settings[2];
       content.setAttribute('inputmode', settings[3]);
-      document.querySelector('#phone-settings').hidden = previousType !== 'phone';
+      document.querySelector('#phone-settings').hidden = !['phone', 'contact'].includes(previousType);
+      document.querySelector('#content-field').hidden = previousType === 'contact';
+      contactFields.hidden = previousType !== 'contact';
+      contactFields.disabled = previousType !== 'contact';
+      vcfButton.hidden = previousType !== 'contact';
     }
     if (event.target === decoration) logoError.hidden = true;
     generate();
@@ -249,6 +300,9 @@
   });
   pngButton.addEventListener('click', () => {
     if (currentQR) canvas.toBlob(blob => download(blob, 'png'), 'image/png');
+  });
+  vcfButton.addEventListener('click', () => {
+    if (currentContact) download(new Blob([currentContact.vcard], { type: 'text/vcard;charset=utf-8' }), 'vcf');
   });
   svgButton.addEventListener('click', () => {
     if (!currentQR) return;
